@@ -1,0 +1,20 @@
+{
+  "name": "argbind",
+  "version": "1.0.0",
+  "description": "Applies functions to values for arguments of a given type or types",
+  "main": "./src/main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mastergray/argbind-js.git"
+  },
+  "keywords": ["Type Checking", "Function Signatures"],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mastergray/argbind-js/issues"
+  },
+  "homepage": "https://github.com/mastergray/argbind-js#readme"
+}
