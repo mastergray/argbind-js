@@ -1,6 +1,6 @@
 {
   "name": "argbind",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "Applies functions to values for arguments of a given type or types",
   "main": "./src/main.js",
   "scripts": {
