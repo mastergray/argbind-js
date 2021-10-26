@@ -1,6 +1,6 @@
 {
   "name": "argbind",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Applies functions to values for arguments of a given type or types",
   "main": "./src/main.js",
   "scripts": {
@@ -12,7 +12,7 @@
   },
   "keywords": ["Type Checking", "Function Signatures"],
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/mastergray/argbind-js/issues"
   },

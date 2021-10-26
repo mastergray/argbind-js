@@ -1,2 +1,2 @@
-# argbind-js
+# argbind
 Applies functions to values for arguments of a given type or types

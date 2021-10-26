@@ -37,7 +37,8 @@ temp.txt
 test.json
 test.js
 
-#Specific NPM files to ignore:
+# Specific NPM files to ignore:
 dist/
 test/
 configs/
+README.md

@@ -2,12 +2,10 @@ module.exports =  class Argbind {
 
   // CONSTRUCTOR :: (* -> *) -> this
   constructor(fn) {
-
     this._map = {};                     // Stores which function to apply to a matched "signature"
     this._default = fn === undefined    // Store function that's applied when no signatures are matched
       ? (...args) => args               // Default function returns all arguments as an array
       : fn;
-
   }
 
   // :: STRING|[STRING], (* -> *) -> this
