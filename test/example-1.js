@@ -10,16 +10,14 @@ let test = (x) => Argbind.init()
     .applyTo(x);
 
 test2 = (x,y) => Argbind.init()
-  //.case(["NUMBER", "NUMBER"], (x,y) => x - y)
+  .case(["NUMBER", "NUMBER"], (x,y) => x - y)
   .case(["STRING", "STRING"], (x,y) => x+y)
-  .case(["STRING", x => {
-    console.log(x > 5);
-    return x > 5;
-  }], (x,y) => {
+  .case([["STRING", "NUMBER"], "NUMBER"], (x,y) => {
     let z = {};
     z[x] = y;
     return z;
   })
+  .inspect()
   .applyTo(x,y)
 
 try {
@@ -27,7 +25,7 @@ try {
   //console.log(test([4]), Argbind.of(4));
   //test()
   //console.log(test("4"), Argbind.of("4"));
-  console.log(test2("5", 20));
+  console.log(test2("x", 2));
 } catch (err) {
   console.log(err);
 }
