@@ -11,17 +11,13 @@ module.exports =  class Argbind {
   // :: STRING|[STRING], (* -> *) -> this
   // Applies function to argument if value has an equal signature:
   case(arg, fn) {
-    let args = Argbind.of(arg) === "ARRAY" ? arg : [arg];
-    args.reduce((result, arg, index) => {
-      if (index === args.length - 1) {
-        result[Argbind.signature(arg)] = fn;
-        return result;
-      }
-      if (result[Argbind.signature(arg)] === undefined) {
-        result[Argbind.signature(arg)] = {};
-      }
-      return result[Argbind.signature(arg)];
-    }, this._map);
+    let args = Argbind.of(arg) === "ARRAY" ? arg : [arg]; // Always treats bound args as an array
+    let signature = Argbind.signature(args);
+    let preds = args.map(arg => Argbind.pred);
+    this._map[signature] = {
+      "preds":preds,
+      "fn":fn
+    }
     return this;
   }
 
@@ -33,30 +29,21 @@ module.exports =  class Argbind {
   }
 
   // :: * -> *
-  // Applies arg to signatures, if no signatures are found, then the default function is applied:
+  // Applies arg to match signature, if no signatures are found, then the default function is applied:
   applyTo() {
     let args = Array.from(arguments);
-    let fn = this.lookup(args, this._map);
-    return fn.apply(null, arguments)
-  }
-
-  // :: [*] -> FUNCTION
-  // Recursively check if args are mapped to a function, if they aren't - then the default function is returned:
-  lookup(args, map) {
-    if (args.length > 0) {
-      let arg = args.shift();
-      let signature = Argbind.signatureOf(arg);
-      let val = map[signature];
-      switch (Argbind.of(val)) {
-        case "FUNCTION":
-          return val;
-        case "UNDEFINED":
-          return this._default;
-        default:
-          return this.lookup(args, val);
+    let signature = Argbind.signatureOf(args);
+    if (this._map[signature] === undefined) {
+      return this._default.apply(null, arguments);
+    }
+    // Checks all predicates against arguments, if any fail then default is applied:
+    for (let i = 0; i < args.length; i++) {
+      console.log(this._map[signature].preds[i].toString());
+      if (this._map[signature].preds[i](args[i]) === false) {
+        return this._default.apply(null, arguments)
       }
     }
-    return this._default;
+    return this._map[signature].fn.apply(null, arguments);
   }
 
   // :: VOID -> this
@@ -86,36 +73,56 @@ module.exports =  class Argbind {
     return val.constructor.name.toUpperCase();
   }
 
-  // :: STRING|[STRING] -> STRING
+  // :: [STRING|[STRING]|FUNCTION] -> STRING
   // Generates a STRING for determining if types are equal between values:
-  static signature(arg) {
-    let argtype = Argbind.of(arg);
-    switch(argtype) {
-      case "STRING":
-        return arg;
-      break;
-      case "ARRAY":
-        return arg.reduce((result, val) => {
-          if (Argbind.of(val) === "STRING") {
-            result.push(val.toUpperCase());
-          }
-          return result;
-        }, []).join("|");
-      default:
-        throw new Error(`argbind.js -> Unexpected type "${argtype}" given when determining signature`);
-    }
+  static signature(args) {
+    return args.map(arg => {
+      let argtype = Argbind.of(arg);
+      switch (argtype) {
+        case "STRING":
+          return arg;
+        break;
+        case "ARRAY":
+          return arg.reduce((result, val) => {
+            if (Argbind.of(val) === "STRING") {
+              result.push(val.toUpperCase());
+            }
+            return result;
+          }, []).join("|");
+        default:
+          throw new Error(`argbind.js -> Unexpected type "${argtype}" given when determining signature`);
+      }
+    }).join("-");
   }
 
-  // :: * -> STRING
+  // :: [*] -> STRING
   // Returns signature for given value:
-  static signatureOf(arg) {
-    switch (Argbind.of(arg)) {
+  static signatureOf(args) {
+    return args.map( arg => {
+      let argtype = Argbind.of(arg);
+      switch (argtype) {
+        case "ARRAY":
+          return arg.map(arg=>{
+            return Argbind.of(arg);
+          }).join("|");
+        default:
+          return argtype;
+      }
+    }).join("-");
+  }
+
+  // :: * -> * -> BOOL
+  // Generates predicate for checking matched signature value:
+  // NOTE: This is so we can express constraints as either a a type or multiple types:
+  static pred(arg) {
+    let argtype = Argbind.of(arg);
+    switch (argtype) {
+      // Returns TRUE if value of arg is included in array of acceptable types:
       case "ARRAY":
-        return arg.map(arg=>{
-          return Argbind.of(arg)
-        }).join("|")
+        return x => arg.includes(x);
+      // Assumes we are only matching name of type and nothing else:
       default:
-        return Argbind.of(arg);
+        return x => true
     }
   }
 
